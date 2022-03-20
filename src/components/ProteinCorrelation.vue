@@ -100,17 +100,15 @@ export default {
         updateProteinExpressions: function() {
             const promise1 = this.updateProteinId(this.geneName1).then(response => {
                 this.proteinId1 = response
-                this.getProteinExpressions(this.proteinId1).then(response => {
-                    this.proteinExpressions1 = response
-                })
+                return this.getProteinExpressions(this.proteinId1)
             })
             const promise2 = this.updateProteinId(this.geneName2).then(response => {
                 this.proteinId2 = response
-                this.getProteinExpressions(this.proteinId2).then(response => {
-                    this.proteinExpressions2 = response
-                })
+                return this.getProteinExpressions(this.proteinId2)
             })
-            Promise.all([promise1, promise2]).then(() => {
+            Promise.all([promise1, promise2]).then((response) => {
+                this.proteinExpressions1 = response[0]
+                this.proteinExpressions2 = response[1]
                 this.plotProteinExpression()
             })
         },
@@ -153,7 +151,13 @@ export default {
                   console.log(error)
                 })
         },
+        getExpressionInCommonSamples: function() {
+            console.log(this.proteinExpressions1)
+            console.log(this.proteinExpressions2)
+        },
         plotProteinExpression: function() {
+            this.getExpressionInCommonSamples()
+            
             // set the dimensions and margins of the graph
             var margin = {top: 10, right: 30, bottom: 30, left: 60},
                 width = 460 - margin.left - margin.right,
