@@ -19,6 +19,9 @@ vue add vuetify
 
 # Add axios (asynchronous server requests)
 npm install axios
+
+# Add d3v4 (JavaScript data visualization framework)
+npm install d3v4
 ```
 
 ## Project setup
