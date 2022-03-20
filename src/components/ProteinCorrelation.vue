@@ -3,19 +3,24 @@
     <v-row class="text-center">
       <v-col cols="12">
         <v-text-field 
-            v-model="geneName"
-            label="Gene name"
+            v-model="geneName1"
+            label="Gene name 1"
             placeholder="EGFR"
         ></v-text-field>
+        <v-text-field 
+            v-model="geneName2"
+            label="Gene name 2"
+            placeholder="EGFLAM"
+        ></v-text-field>
         <v-btn
-            @click="updateProteinId">
-            Get Protein ID
+            @click="updateProteinExpressions">
+            Get Protein Expressions
         </v-btn>
       </v-col>
     </v-row>
     <v-row class="text-center">
-      <v-col cols="12">
-        <span>Protein ID: {{ proteinId }}</span>
+      <v-col cols="6">
+        <span>Protein ID: {{ proteinId1 }}</span>
         <v-simple-table>
             <template v-slot:default>
               <thead>
@@ -30,7 +35,33 @@
               </thead>
               <tbody>
                 <tr
-                  v-for="item in proteinExpressions"
+                  v-for="item in proteinExpressions1"
+                  :key="item.SAMPLE_ID"
+                >
+                  <td>{{ item.SAMPLE_ID }}</td>
+                  <td>{{ item.EXPRESSION }}</td>
+                </tr>
+              </tbody>
+            </template>
+        </v-simple-table>
+      </v-col>
+      <v-col cols="6">
+        <span>Protein ID: {{ proteinId2 }}</span>
+        <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th class="text-left">
+                    Sample ID
+                  </th>
+                  <th class="text-left">
+                    Expression
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="item in proteinExpressions2"
                   :key="item.SAMPLE_ID"
                 >
                   <td>{{ item.SAMPLE_ID }}</td>
@@ -51,35 +82,53 @@ export default {
     name: 'ProteinCorrelation',
 
     data: () => ({
-      geneName: "",
-      proteinId: "",
-      proteinExpressions: []
+      geneName1: "",
+      geneName2: "",
+      proteinId1: "",
+      proteinId2: "",
+      proteinExpressions1: [],
+      proteinExpressions2: []
     }),
     
     methods: {
-        updateProteinId: function() {
-            axios
+        updateProteinExpressions: async function() {
+            this.updateProteinId(this.geneName1).then(response => {
+                this.proteinId1 = response
+                this.getProteinExpressions(this.proteinId1).then(response => {
+                    this.proteinExpressions1 = response
+                })
+            })
+            this.updateProteinId(this.geneName2).then(response => {
+                this.proteinId2 = response
+                this.getProteinExpressions(this.proteinId2).then(response => {
+                    this.proteinExpressions2 = response
+                })
+            })
+        },
+        updateProteinId: function(geneName) {
+            let proteinId = -1
+            return axios
                 .get("https://www.proteomicsdb.org/proteomicsdb/logic/api_v2/api.xsodata/Protein", 
-                    { params : { '$filter' : `GENE_NAME eq '${this.geneName}' and DATABASE eq 'sp' and PARENT_PROTEIN_ID eq PROTEIN_ID and DECOY eq 0`,
+                    { params : { '$filter' : `GENE_NAME eq '${geneName}' and DATABASE eq 'sp' and PARENT_PROTEIN_ID eq PROTEIN_ID and DECOY eq 0`,
                                  '$select' : 'PROTEIN_ID', 
                                  '$format' : 'json' } 
                     }
                 )
                 .then(response => {
                   if (response.data.d.results.length > 0) {  
-                    this.proteinId = response.data.d.results[0].PROTEIN_ID
-                    this.getProteinExpression()
-                  } else {
-                    this.proteinId = -1
+                    proteinId = response.data.d.results[0].PROTEIN_ID
                   }
+                  return proteinId
                 })
                 .catch(error => {
                   console.log(error)
                 })
+            
         },
-        getProteinExpression: function() {
-            axios
-                .get(`https://www.proteomicsdb.org/proteomicsdb/logic/api_v2/api.xsodata/Protein(${this.proteinId})/ProteinExpression`,
+        getProteinExpressions: function(proteinId) {
+            let proteinExpressions = []
+            return axios
+                .get(`https://www.proteomicsdb.org/proteomicsdb/logic/api_v2/api.xsodata/Protein(${proteinId})/ProteinExpression`,
                     { params : { '$filter' : 'CALCULATION_METHOD eq 0',
                                  '$select' : 'SAMPLE_ID,EXPRESSION',
                                  '$format' : 'json' }
@@ -87,10 +136,9 @@ export default {
                 )
                 .then(response => {
                   if (response.data.d.results.length > 0) {  
-                    this.proteinExpressions = response.data.d.results
-                  } else {
-                    this.proteinExpressions = []
+                    proteinExpressions = response.data.d.results
                   }
+                  return proteinExpressions
                 })
                 .catch(error => {
                   console.log(error)
