@@ -11,7 +11,34 @@
             @click="updateProteinId">
             Get Protein ID
         </v-btn>
-        {{ proteinId }}
+      </v-col>
+    </v-row>
+    <v-row class="text-center">
+      <v-col cols="12">
+        <span>Protein ID: {{ proteinId }}</span>
+        <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th class="text-left">
+                    Sample ID
+                  </th>
+                  <th class="text-left">
+                    Expression
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="item in proteinExpressions"
+                  :key="item.SAMPLE_ID"
+                >
+                  <td>{{ item.SAMPLE_ID }}</td>
+                  <td>{{ item.EXPRESSION }}</td>
+                </tr>
+              </tbody>
+            </template>
+        </v-simple-table>
       </v-col>
     </v-row>
   </v-container>
@@ -61,7 +88,6 @@ export default {
                 .then(response => {
                   if (response.data.d.results.length > 0) {  
                     this.proteinExpressions = response.data.d.results
-                    console.log(this.proteinExpressions)
                   } else {
                     this.proteinExpressions = []
                   }
