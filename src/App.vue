@@ -38,19 +38,19 @@
     </v-app-bar>
 
     <v-main>
-      <HelloWorld/>
+      <ProteinCorrelation/>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
+import ProteinCorrelation from './components/ProteinCorrelation';
 
 export default {
   name: 'App',
 
   components: {
-    HelloWorld,
+    ProteinCorrelation,
   },
 
   data: () => ({
