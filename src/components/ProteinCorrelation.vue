@@ -152,12 +152,19 @@ export default {
                 })
         },
         getExpressionInCommonSamples: function() {
-            console.log(this.proteinExpressions1)
-            console.log(this.proteinExpressions2)
+            let proteinExpressionsBySampleId1 = Object.assign({}, ...this.proteinExpressions1.map((x) => ({[x.SAMPLE_ID]: x.EXPRESSION})));
+            let proteinExpressionsBySampleId2 = Object.assign({}, ...this.proteinExpressions2.map((x) => ({[x.SAMPLE_ID]: x.EXPRESSION})));
+            let expressionsInCommonSamples = []
+            for (const [key, value] of Object.entries(proteinExpressionsBySampleId1)) {
+                if (key in proteinExpressionsBySampleId2) {
+                    expressionsInCommonSamples.push({ sampleId : key, proteinExpression1: value, proteinExpression2: proteinExpressionsBySampleId2[key]});
+                }
+            }
+            return expressionsInCommonSamples
         },
         plotProteinExpression: function() {
-            this.getExpressionInCommonSamples()
-            
+            let data = this.getExpressionInCommonSamples()
+            console.log(data)
             // set the dimensions and margins of the graph
             var margin = {top: 10, right: 30, bottom: 30, left: 60},
                 width = 460 - margin.left - margin.right,
@@ -172,36 +179,32 @@ export default {
                 .attr("transform",
                       "translate(" + margin.left + "," + margin.top + ")");
 
-            //Read the data
-            d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/2_TwoNum.csv", function(data) {
+            // Add X axis
+            var x = d3.scaleLinear()
+              .domain([0, 10])
+              .range([ 0, width ]);
+            svg.append("g")
+              .attr("transform", "translate(0," + height + ")")
+              .call(d3.axisBottom(x));
 
-              // Add X axis
-              var x = d3.scaleLinear()
-                .domain([0, 4000])
-                .range([ 0, width ]);
-              svg.append("g")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(x));
+            // Add Y axis
+            var y = d3.scaleLinear()
+              .domain([0, 10])
+              .range([ height, 0]);
+            svg.append("g")
+              .call(d3.axisLeft(y));
 
-              // Add Y axis
-              var y = d3.scaleLinear()
-                .domain([0, 500000])
-                .range([ height, 0]);
-              svg.append("g")
-                .call(d3.axisLeft(y));
+            // Add dots
+            svg.append('g')
+              .selectAll("dot")
+              .data(data)
+              .enter()
+              .append("circle")
+                .attr("cx", function (d) { return x(d.proteinExpression1); } )
+                .attr("cy", function (d) { return y(d.proteinExpression2); } )
+                .attr("r", 1.5)
+                .style("fill", "#69b3a2")
 
-              // Add dots
-              svg.append('g')
-                .selectAll("dot")
-                .data(data)
-                .enter()
-                .append("circle")
-                  .attr("cx", function (d) { return x(d.GrLivArea); } )
-                  .attr("cy", function (d) { return y(d.SalePrice); } )
-                  .attr("r", 1.5)
-                  .style("fill", "#69b3a2")
-
-            })
         }
     },
 
