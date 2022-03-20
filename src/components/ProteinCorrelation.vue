@@ -98,23 +98,20 @@ export default {
     
     methods: {
         updateProteinExpressions: function() {
-            this.updateProteinId(this.geneName1).then(response => {
+            const promise1 = this.updateProteinId(this.geneName1).then(response => {
                 this.proteinId1 = response
                 this.getProteinExpressions(this.proteinId1).then(response => {
                     this.proteinExpressions1 = response
-                    if (this.proteinExpressions2.length > 0) {
-                        this.plotProteinExpression()
-                    }
                 })
             })
-            this.updateProteinId(this.geneName2).then(response => {
+            const promise2 = this.updateProteinId(this.geneName2).then(response => {
                 this.proteinId2 = response
                 this.getProteinExpressions(this.proteinId2).then(response => {
                     this.proteinExpressions2 = response
-                    if (this.proteinExpressions1.length > 0) {
-                        this.plotProteinExpression()
-                    }
                 })
+            })
+            Promise.all([promise1, promise2]).then(() => {
+                this.plotProteinExpression()
             })
         },
         updateProteinId: function(geneName) {
