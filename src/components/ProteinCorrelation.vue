@@ -20,7 +20,9 @@ export default {
 
     mounted() {
         axios
-            .get("https://www.proteomicsdb.org/proteomicsdb/logic/api_v2/api.xsodata/Protein?$filter=GENE_NAME eq 'EGFR'&$format=json")
+            .get("https://www.proteomicsdb.org/proteomicsdb/logic/api_v2/api.xsodata/Protein", 
+                { params : { '$filter' : "GENE_NAME eq 'EGFR'", 
+                             '$format' : 'json' } })
             .then(response => {
               console.log(response)
             })
