@@ -25,7 +25,8 @@ export default {
 
     data: () => ({
       geneName: "",
-      proteinId: ""
+      proteinId: "",
+      proteinExpressions: []
     }),
     
     methods: {
@@ -38,11 +39,31 @@ export default {
                     }
                 )
                 .then(response => {
-                  console.log(response.data.d.results)
                   if (response.data.d.results.length > 0) {  
                     this.proteinId = response.data.d.results[0].PROTEIN_ID
+                    this.getProteinExpression()
                   } else {
                     this.proteinId = -1
+                  }
+                })
+                .catch(error => {
+                  console.log(error)
+                })
+        },
+        getProteinExpression: function() {
+            axios
+                .get(`https://www.proteomicsdb.org/proteomicsdb/logic/api_v2/api.xsodata/Protein(${this.proteinId})/ProteinExpression`,
+                    { params : { '$filter' : 'CALCULATION_METHOD eq 0',
+                                 '$select' : 'SAMPLE_ID,EXPRESSION',
+                                 '$format' : 'json' }
+                    }
+                )
+                .then(response => {
+                  if (response.data.d.results.length > 0) {  
+                    this.proteinExpressions = response.data.d.results
+                    console.log(this.proteinExpressions)
+                  } else {
+                    this.proteinExpressions = []
                   }
                 })
                 .catch(error => {
