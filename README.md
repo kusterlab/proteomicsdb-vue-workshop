@@ -1,5 +1,32 @@
 # proteomicsdb-vue-workshop
 
+
+## How this repo was started
+
+```
+# Install node package manager (npm) on Ubuntu.
+# For other platforms, check https://nodejs.org/en/download/package-manager/
+sudo apt install npm 
+
+# Update npm to the latest version
+npm install -g npm@latest
+
+# Install vue.js
+npm install -g @vue/cli
+
+# Create a new project in the current directory
+vue create . # select Vue 2
+
+# Add vuetify (convenient and pretty user interface)
+vue add vuetify
+
+# Add axios (asynchronous server requests)
+npm install axios
+
+# Add d3v4 (JavaScript data visualization framework)
+npm install d3v4
+```
+
 ## Project setup
 ```
 npm install
