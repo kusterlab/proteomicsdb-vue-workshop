@@ -1,35 +1,71 @@
 <template>
   <v-container>
-    <v-text-field 
-        v-model="geneName1"
-        label="Gene name 1"
-        placeholder="EGFR"
-        @change="updateProteinId"
-     ></v-text-field>
-     <span>Protein id 1: {{ proteinId1 }}</span>
-     <v-simple-table>
-        <template v-slot:default>
-          <thead>
-            <tr>
-              <th class="text-left">
-                Sample ID
-              </th>
-              <th class="text-left">
-                Expression
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="item in proteinExpressions1"
-              :key="item.SAMPLE_ID"
-            >
-              <td>{{ item.SAMPLE_ID }}</td>
-              <td>{{ item.EXPRESSION }}</td>
-            </tr>
-          </tbody>
-        </template>
-      </v-simple-table>
+    <v-row class="text-center">
+      <v-col cols="4">
+        <v-text-field 
+            v-model="geneName1"
+            label="Gene name 1"
+            placeholder="EGFR"
+            @change="updateProteinId"
+         ></v-text-field>
+         <span>Protein id 1: {{ proteinId1 }}</span>
+         <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th class="text-left">
+                    Sample ID
+                  </th>
+                  <th class="text-left">
+                    Expression
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="item in proteinExpressions1"
+                  :key="item.SAMPLE_ID"
+                >
+                  <td>{{ item.SAMPLE_ID }}</td>
+                  <td>{{ item.EXPRESSION }}</td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
+       </v-col>
+       <v-col cols="4">
+         <v-text-field 
+            v-model="geneName2"
+            label="Gene name 2"
+            placeholder="EGFLAM"
+            @change="updateProteinId"
+         ></v-text-field>
+         <span>Protein id 2: {{ proteinId2 }}</span>
+         <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th class="text-left">
+                    Sample ID
+                  </th>
+                  <th class="text-left">
+                    Expression
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="item in proteinExpressions2"
+                  :key="item.SAMPLE_ID"
+                >
+                  <td>{{ item.SAMPLE_ID }}</td>
+                  <td>{{ item.EXPRESSION }}</td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
+        </v-col>
+     </v-row>
   </v-container>
 </template>
 
@@ -40,8 +76,11 @@ export default {
     name: 'ProteinCorrelation',
     data: () => ({
       geneName1: "",
+      geneName2: "",
       proteinId1: "",
-      proteinExpressions1: []
+      proteinId2: "",
+      proteinExpressions1: [],
+      proteinExpressions2: []
     }),
     methods: {
         updateProteinId() {
@@ -51,6 +90,13 @@ export default {
             })
             promise1.then(response => {
                 this.proteinExpressions1 = response
+            })
+            let promise2 = this.getProteinId(this.geneName2).then(response => {
+                this.proteinId2 = response
+                return this.getProteinExpressions(this.proteinId2)
+            })
+            promise2.then(response => {
+                this.proteinExpressions2 = response
             })
         },
         getProteinId(geneName) {
