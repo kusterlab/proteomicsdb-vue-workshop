@@ -65,6 +65,36 @@
             </template>
           </v-simple-table>
         </v-col>
+        <v-col cols="4">
+         <span>Overlap</span>
+         <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th class="text-left">
+                    Sample ID
+                  </th>
+                  <th class="text-left">
+                    Expression 1
+                  </th>
+                  <th class="text-left">
+                    Expression 2
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="item in proteinExpressionsCommon"
+                  :key="item.sampleId"
+                >
+                  <td>{{ item.sampleId }}</td>
+                  <td>{{ item.proteinExpression1 }}</td>
+                  <td>{{ item.proteinExpression2 }}</td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
+        </v-col>
      </v-row>
   </v-container>
 </template>
@@ -80,7 +110,8 @@ export default {
       proteinId1: "",
       proteinId2: "",
       proteinExpressions1: [],
-      proteinExpressions2: []
+      proteinExpressions2: [],
+      proteinExpressionsCommon: []
     }),
     methods: {
         updateProteinId() {
@@ -88,15 +119,14 @@ export default {
                 this.proteinId1 = response
                 return this.getProteinExpressions(this.proteinId1)
             })
-            promise1.then(response => {
-                this.proteinExpressions1 = response
-            })
             let promise2 = this.getProteinId(this.geneName2).then(response => {
                 this.proteinId2 = response
                 return this.getProteinExpressions(this.proteinId2)
             })
-            promise2.then(response => {
-                this.proteinExpressions2 = response
+            Promise.all([promise1, promise2]).then((response) => {
+                this.proteinExpressions1 = response[0]
+                this.proteinExpressions2 = response[1]
+                this.proteinExpressionsCommon = this.getExpressionInCommonSamples()
             })
         },
         getProteinId(geneName) {
@@ -136,7 +166,18 @@ export default {
                 .catch(error => {
                   console.log(error)
                 })
-        }
+        },
+        getExpressionInCommonSamples: function() {
+            let proteinExpressionsBySampleId1 = Object.assign({}, ...this.proteinExpressions1.map((x) => ({[x.SAMPLE_ID]: x.EXPRESSION})));
+            let proteinExpressionsBySampleId2 = Object.assign({}, ...this.proteinExpressions2.map((x) => ({[x.SAMPLE_ID]: x.EXPRESSION})));
+            let expressionsInCommonSamples = []
+            for (const [key, value] of Object.entries(proteinExpressionsBySampleId1)) {
+                if (key in proteinExpressionsBySampleId2) {
+                    expressionsInCommonSamples.push({ sampleId : key, proteinExpression1: value, proteinExpression2: proteinExpressionsBySampleId2[key]});
+                }
+            }
+            return expressionsInCommonSamples
+        },
     },
 }
 </script>
