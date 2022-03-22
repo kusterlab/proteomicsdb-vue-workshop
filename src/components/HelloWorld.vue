@@ -67,6 +67,7 @@
         </v-col>
         <v-col cols="4">
          <span>Overlap</span>
+         <div id="protein_scatterplot"></div>
          <v-simple-table>
             <template v-slot:default>
               <thead>
@@ -101,6 +102,7 @@
 
 <script>
 import axios from 'axios'
+import * as d3 from "d3v4";
 
 export default {
     name: 'ProteinCorrelation',
@@ -127,6 +129,7 @@ export default {
                 this.proteinExpressions1 = response[0]
                 this.proteinExpressions2 = response[1]
                 this.proteinExpressionsCommon = this.getExpressionInCommonSamples()
+                this.plotProteinExpression()
             })
         },
         getProteinId(geneName) {
@@ -178,6 +181,52 @@ export default {
             }
             return expressionsInCommonSamples
         },
+        plotProteinExpression: function() {
+            let data = this.getExpressionInCommonSamples()
+            console.log(data)
+            // set the dimensions and margins of the graph
+            var margin = {top: 10, right: 30, bottom: 30, left: 60},
+                width = 460 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+            
+            d3.select("#protein_scatterplot").select("svg").remove()
+            
+            // append the svg object to the body of the page
+            var svg = d3.select("#protein_scatterplot")
+              .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform",
+                      "translate(" + margin.left + "," + margin.top + ")");
+
+            // Add X axis
+            var x = d3.scaleLinear()
+              .domain([0, 10])
+              .range([ 0, width ]);
+            svg.append("g")
+              .attr("transform", "translate(0," + height + ")")
+              .call(d3.axisBottom(x));
+
+            // Add Y axis
+            var y = d3.scaleLinear()
+              .domain([0, 10])
+              .range([ height, 0]);
+            svg.append("g")
+              .call(d3.axisLeft(y));
+
+            // Add dots
+            svg.append('g')
+              .selectAll("dot")
+              .data(data)
+              .enter()
+              .append("circle")
+                .attr("cx", function (d) { return x(d.proteinExpression1); } )
+                .attr("cy", function (d) { return y(d.proteinExpression2); } )
+                .attr("r", 1.5)
+                .style("fill", "#69b3a2")
+
+        }
     },
 }
 </script>
